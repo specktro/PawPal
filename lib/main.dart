@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pawpal/data/repositories/mock_dog_repository.dart';
-import 'package:pawpal/presentation/blocs/dog_blocs.dart';
-import 'package:pawpal/presentation/blocs/dog_events.dart';
-import 'package:pawpal/presentation/screens/dog_list_screen.dart';
+
+import 'data/repositories/mock_dog_repository.dart';
+import 'presentation/blocs/dog_bloc.dart';
+import 'presentation/screens/dog_detail_screen.dart';
+import 'presentation/theme/app_theme.dart';
+import 'presentation/theme/theme_bloc.dart';
 
 void main() {
   runApp(const VetApp());
@@ -14,17 +16,43 @@ class VetApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Pet Care App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
-      home: BlocProvider(
-        create: (context) => DogBloc(repository: MockDogRepository())..add(LoadDogs()),
-        child: const DogListScreen(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => ThemeBloc()),
+        BlocProvider(
+          create: (context) => DogBloc(repository: MockDogRepository())
+            ..add(LoadDogs()),
+        ),
+      ],
+      child: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, themeState) {
+          // Listen to system theme changes
+          final systemBrightness = MediaQuery.platformBrightnessOf(context);
+          if (systemBrightness != themeState.systemBrightness) {
+            context.read<ThemeBloc>().add(SystemThemeChanged(systemBrightness));
+          }
+
+          return MaterialApp(
+            title: 'PawPal',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: _convertThemeMode(themeState.themeMode),
+            home: const DogListScreen(),
+            debugShowCheckedModeBanner: false,
+          );
+        },
       ),
     );
+  }
+
+  ThemeMode _convertThemeMode(AppThemeMode mode) {
+    switch (mode) {
+      case AppThemeMode.light:
+        return ThemeMode.light;
+      case AppThemeMode.dark:
+        return ThemeMode.dark;
+      case AppThemeMode.system:
+        return ThemeMode.system;
+    }
   }
 }

@@ -1,9 +1,90 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pawpal/presentation/blocs/dog_events.dart';
-import 'package:pawpal/presentation/blocs/dog_states.dart';
-import 'package:pawpal/domain/repositories/dog_repository.dart';
 
-// BLoC Layer - BLoC
+import '../../domain/models/dog.dart';
+import '../../domain/repositories/dog_repository.dart';
+
+// Events
+abstract class DogEvent extends Equatable {
+  const DogEvent();
+
+  @override
+  List<Object> get props => [];
+}
+
+class LoadDogs extends DogEvent {}
+
+class SearchDogs extends DogEvent {
+  final String query;
+
+  const SearchDogs(this.query);
+
+  @override
+  List<Object> get props => [query];
+}
+
+class SelectDog extends DogEvent {
+  final String dogId;
+
+  const SelectDog(this.dogId);
+
+  @override
+  List<Object> get props => [dogId];
+}
+
+// States
+abstract class DogState extends Equatable {
+  const DogState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class DogInitial extends DogState {}
+
+class DogLoading extends DogState {}
+
+class DogLoaded extends DogState {
+  final List<Dog> dogs;
+  final List<Dog> filteredDogs;
+  final String searchQuery;
+  final Dog? selectedDog;
+
+  const DogLoaded({
+    required this.dogs,
+    required this.filteredDogs,
+    this.searchQuery = '',
+    this.selectedDog,
+  });
+
+  DogLoaded copyWith({
+    List<Dog>? dogs,
+    List<Dog>? filteredDogs,
+    String? searchQuery,
+    Dog? selectedDog,
+  }) {
+    return DogLoaded(
+      dogs: dogs ?? this.dogs,
+      filteredDogs: filteredDogs ?? this.filteredDogs,
+      searchQuery: searchQuery ?? this.searchQuery,
+      selectedDog: selectedDog ?? this.selectedDog,
+    );
+  }
+
+  @override
+  List<Object?> get props => [dogs, filteredDogs, searchQuery, selectedDog];
+}
+
+class DogError extends DogState {
+  final String message;
+
+  const DogError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+// BLoC
 class DogBloc extends Bloc<DogEvent, DogState> {
   final DogRepository repository;
 

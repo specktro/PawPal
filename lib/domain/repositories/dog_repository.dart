@@ -1,6 +1,5 @@
-import 'package:pawpal/domain/entities/dog.dart';
+import '../models/dog.dart';
 
-// Domain Layer - Repository Interface
 abstract class DogRepository {
   Future<List<Dog>> getAllDogs();
   Future<Dog?> getDogById(String id);

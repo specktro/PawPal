@@ -1,6 +1,5 @@
-// Data Layer - Repository Implementation
-import 'package:pawpal/domain/entities/dog.dart';
-import 'package:pawpal/domain/repositories/dog_repository.dart';
+import '../../domain/models/dog.dart';
+import '../../domain/repositories/dog_repository.dart';
 
 class MockDogRepository implements DogRepository {
   static final List<Dog> _mockDogs = [
@@ -112,7 +111,6 @@ class MockDogRepository implements DogRepository {
 
   @override
   Future<List<Dog>> getAllDogs() async {
-    // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 500));
     return List.from(_mockDogs);
   }
@@ -121,7 +119,7 @@ class MockDogRepository implements DogRepository {
   Future<Dog?> getDogById(String id) async {
     await Future.delayed(const Duration(milliseconds: 300));
     return _mockDogs.firstWhere(
-          (dog) => dog.id == id,
+      (dog) => dog.id == id,
       orElse: () => throw Exception('Dog not found'),
     );
   }
@@ -129,8 +127,8 @@ class MockDogRepository implements DogRepository {
   @override
   Future<List<Dog>> getDogsByOwner(String ownerName) async {
     await Future.delayed(const Duration(milliseconds: 400));
-    return _mockDogs.where((dog) =>
-        dog.ownerName.toLowerCase().contains(ownerName.toLowerCase())
+    return _mockDogs.where((dog) => 
+      dog.ownerName.toLowerCase().contains(ownerName.toLowerCase())
     ).toList();
   }
 }
